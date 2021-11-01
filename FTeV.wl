@@ -2,7 +2,7 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*FTeV 0.13*)
+(*FTeV*)
 
 
 (* ::Subtitle:: *)
@@ -22,7 +22,7 @@ BeginPackage["FTeV`"];
 
 Clear["FTeV`*"]; (*Useful if FTeV is called more than once*)
 
-Print[Style["Fast Tensors eValuation", Bold], " v.0.13", " ", Style["("<>DateString[FileDate[$InputFileName], {"Year", ".", "Month", ".", "Day", " ", "Time"}]<>")", 09]];
+Print[Style["Fast Tensors eValuation", Bold], " v.0.13.1", " ", Style["("<>DateString[FileDate[$InputFileName], {"Year", ".", "Month", ".", "Day", " ", "Time"}]<>")", 09]];
 Print["Help: Start by defining $Coordinates (coordinates names vector) and $Metric (the metric matrix)."];
 Print["Use tensorEvaluate[\"X\"] or tev[\"X\"] to compute X, where X can be: \n * \"Chr\" for Christoffel symbol, \n * \"Riemann\" for Riemann tensor, \n * \"Ricci\" for Ricci tensor, \n * \"RicciS\" for Ricci scalar, \n * \"G\" for Einstein tensor, \n * \"Weyl\" for Weyl tensor, \n * \"Kret\" for Kretschmann scalar."];
 
@@ -142,9 +142,9 @@ tensorEvaluate[string_?StringQ, OptionsPattern[]]:= Block[
   {
     coordvec, (* coordinate vector *)
     metric,
-    d,  (* number of space only dimensions, no time *) 
-    Chr, (*Christofell Symbols*)
-    gI,  (* inverse metric components*)
+    dim,  (* number of space-only dimensions.*) 
+    Chr, (*Christofell symbol*)
+    gI,  (* inverse-metric components*)
     g,  (*metric components*)
     R,   (*Ricci or Riemann tensors, depending on the number of components*)
     RS, (*Ricci Scalar*)
@@ -169,37 +169,37 @@ tensorEvaluate[string_?StringQ, OptionsPattern[]]:= Block[
   gI[i_,j_]:= Inverse[metric][[i+1,j+1]];
 
   (* Christoffel symbols *)
-  Chr[k_,i_,j_]:= Chr[k,i,j] = 1/2 Sum[gI[k,l]  ( D[g[l,i],x[j]] + D[g[l,j],x[i]]- D[g[i,j],x[l]]),{l,0,d}];
+  Chr[k_,i_,j_]:= Chr[k,i,j] = 1/2 Sum[gI[k,l]  ( D[g[l,i],x[j]] + D[g[l,j],x[i]]- D[g[i,j],x[l]]),{l,0,dim}];
   
   (* Riemman tensor *)
-  R[l_,i_,k_,j_] := R[l,i,k,j] = D[Chr[l,i,j],x[k]] - D[Chr[l,i,k],x[j]] + Sum[Chr[l,m,k] Chr[m,i,j]- Chr[l,m,j]Chr[m,i, k], {m,0,d}];    
+  R[l_,i_,k_,j_] := R[l,i,k,j] = D[Chr[l,i,j],x[k]] - D[Chr[l,i,k],x[j]] + Sum[Chr[l,m,k] Chr[m,i,j]- Chr[l,m,j]Chr[m,i, k], {m,0,dim}];    
   
   (* Ricci tensor *)
-  R[i_,j_] := R[i,j] = Sum[R[m,i,m,j], {m,0,d}];
+  R[i_,j_] := R[i,j] = Sum[R[m,i,m,j], {m,0,dim}];
   
   (* Ricci scalar*)
-  RS := RS = Sum[R[i,m] gI[i, m], {m,0,d}, {i,0,d}];   
+  RS := RS = Sum[R[i,m] gI[i, m], {m,0,dim}, {i,0,dim}];   
   
   (* Einstein tensor*)
   G[i_,j_] := G[i,j] = R[i,j] - 1/2  RS g[i,j];
     
   (* Weyl Tensor *)
-  Weyl[l_,i_,k_,j_] := Weyl[l,i,k,j] = Sum[g[l,m]R[m,i,k,j],{m,0,d}]-1/(d-1) (R[l,k] g[i,j]+R[i,j] g[l,k]-R[l,j]g[i,k]-R[i,k]g[l,j])+1/(d (d-1)) RS(g[l,k] g[i,j] -g[i,k] g[l,j]);
+  Weyl[l_,i_,k_,j_] := Weyl[l,i,k,j] = Sum[g[l,m]R[m,i,k,j],{m,0,dim}]-1/(dim-1) (R[l,k] g[i,j]+R[i,j] g[l,k]-R[l,j]g[i,k]-R[i,k]g[l,j])+1/(dim (dim-1)) RS(g[l,k] g[i,j] -g[i,k] g[l,j]);
   
   Kret:=(
-    ruddd=Table[R[l,i,k,j],{l,0,d},{i,0,d},{j,0,d},{k,0,d}];
+    ruddd=Table[R[l,i,k,j],{l,0,dim},{i,0,dim},{j,0,dim},{k,0,dim}];
     ruuuu=indices[ruddd,"uddd","uuuu"];
     rdddd=indices[ruddd,"uddd","dddd"];
-    Sum[ruuuu[[var1,var2,var3,var4]] rdddd[[var1,var2,var3,var4]] , {var1,d+1},{var2,d+1},{var3,d+1},{var4,d+1}]
+    Sum[ruuuu[[var1,var2,var3,var4]] rdddd[[var1,var2,var3,var4]] , {var1,dim+1},{var2,dim+1},{var3,dim+1},{var4,dim+1}]
   );
 
   Switch[ToLowerCase@string,
-    "g", Table[G[i,j], {i,0,d},{j,0,d}],
-    "chr",Table[Chr[k,i,j],{k,0,d},{i,0,d},{j,0,d}],
-    "riemann",Table[R[l,i,k,j],{l,0,d},{i,0,d},{j,0,d},{k,0,d}],
-    "ricci",Table[R[i,j],{i,0,d},{j,0,d}],
+    "g", Table[G[i,j], {i,0,dim},{j,0,dim}],
+    "chr",Table[Chr[k,i,j],{k,0,dim},{i,0,dim},{j,0,dim}],
+    "riemann",Table[R[l,i,k,j],{l,0,dim},{i,0,dim},{j,0,dim},{k,0,dim}],
+    "ricci",Table[R[i,j],{i,0,dim},{j,0,dim}],
     "riccis", RS,
-    "weyl", Table[Weyl[l,i,k,j],{l,0,d},{i,0,d},{j,0,d},{k,0,d}],
+    "weyl", Table[Weyl[l,i,k,j],{l,0,dim},{i,0,dim},{j,0,dim},{k,0,dim}],
     "kret", Kret,
     _ , $Failed
   ]
