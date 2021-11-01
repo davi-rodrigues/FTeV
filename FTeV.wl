@@ -14,46 +14,24 @@
 (*Universiade Federal do Espirito Santo*)
 (*This work was in part supported by  CNPq and FAPES.*)
 
-(* ::Section:: *)
-(*TO DO*)
-
-(*
-  - All FTeV functions should start with lower case letter
-  - tensorPrint: incorporate option to set the indices positions. The default case should be all down. Exemplo: tensorPrint[tensor, "udu"]
-  - tensorPrint: print indices positions (up or down) in the LHS
-  - What could be the name of the FTeV function? tensorCompute or tC.
-  - indices function should only require the target indices position (since the standard is all down)
-  - T["ud", a,b] faz a conversão de "dd" para "ud". 
-  - toTensor: should generate a function to yield the tensor components type T["dd",a,b] and reserve T["dd"] for the full tensor.
-  - toTensor syntax:
-    - toTensor[T[a], a] generates a List from the componets T[a]. By default, this tensor will be assumed to be covariant.
-    - toTensor[T[a],a, "u"], the same of the previous case, but first it converts the current index status ("u") to covariant.
-  - defTensor[List, T], from a given List, assumed to represent a covariant tensor, defines the symbol T as a tensor.
-    This implies that T[] will be attributed to be the full covariant tensor.
-    This defines T["udu"] to generate List with the new corresponding indices.
-    This defines T["ddd", a,b] as the components of the fully covariant tensor
-  - DCov syntax: 
-    - DCov[T[], a] generates the component a of the covariant derivative of T (all indices down).
-    - DCov[T[]] generates a List that fully represents the covariant derivative of T (all indices down).
-  - Documentation
-*)
-
 
 (* ::Section:: *)
 (*Begin package*)
 
 BeginPackage["FTeV`"];
 
-Print[Style["Starting FTeV 0.13 TEST", Bold]];
-Print["Inside FTeV[] use: G for the Einstein Tensor; Riemann for Riemann tensor; Ricci for Ricci tensor; RicciS for Ricci Scalar; Chr for Christoffel Symbols; Weyl for Weyl tensor and kret for Kretschmann scalar."]
-Print["The coordinates and the metric tensor must be named $Coordinates and $Metric, respectively."]
+Clear["FTeV`*"]; (*Useful if FTeV is called more than once*)
+
+Print[Style["Fast Tensors eValuation", Bold], " v.0.13", " ", Style["("<>DateString[FileDate[$InputFileName], {"Year", ".", "Month", ".", "Day", " ", "Time"}]<>")", 09]];
+Print["Help: Start by defining $Coordinates (coordinates names vector) and $Metric (the metric matrix)."];
+Print["Use tensorEvaluate[\"X\"] or tev[\"X\"] to compute X, where X can be: \n * \"Chr\" for Christoffel symbol, \n * \"Riemann\" for Riemann tensor, \n * \"Ricci\" for Ricci tensor, \n * \"RicciS\" for Ricci scalar, \n * \"G\" for Einstein tensor, \n * \"Weyl\" for Weyl tensor, \n * \"Kret\" for Kretschmann scalar."];
+
 
 
 (* ::Subsection:: *)
 (*Usage messages*)
 
-
-FTeV::usage="FTeV[string] reads off the global $Coordinates and $Metric and takes in a string, which must be one of the following:
+tensorEvaluate::usage="tensorCompute[string] reads off the global $Coordinates and $Metric and takes in a string, which must be one of the following:
 chr: For Christoffel symbols of the second kind (\!\(\*SubscriptBox[SuperscriptBox[\(gamma\), \(a\)], \(bc\)]\));
 riemann: For Riemman tensor (\!\(\*SubscriptBox[SuperscriptBox[\(R\), \(d\)], \(abc\)]\));
 ricci: For Covariant Ricci tensor (\!\(\*SubscriptBox[\(R\), \(ac\)]\));
@@ -62,6 +40,7 @@ g: For Covariant Einstein Tensor (\!\(\*SubscriptBox[\(G\), \(ac\)]\));
 weyl: For Weyl Tensor (\!\(\*SubscriptBox[\(C\), \(abcd\)]\));
 kret: For Kretschmann scalar.";
 
+tev::usage = tensorEvaluate::usage;
 
 indices::usage = "indices[\!\(\*
 StyleBox[\"tensor\",\nFontSlant->\"Italic\"]\)\!\(\*
@@ -84,6 +63,7 @@ $PerturbationSymbol ;
 $TensorPrintReplacements;
 $TensorPrintReplacementsAlternative;
 
+
 {g, gI, X, DCov, DDCov, spacetime, space, FirstOrder, FO, gamma, DimensionSpace, Contract, Metric, Coordinates, ToTensor, TensorBox, InsertTimeWeight};
 
 
@@ -94,7 +74,7 @@ $TensorPrintReplacementsAlternative;
 Begin["`Private`"];
 
 
-(* ::Subsection:: *)
+(*::Subsection::*)
 (*General purpose and "public" functions*)
 
 
@@ -157,26 +137,29 @@ InsertTimeWeight[expression_, weight_:Sqrt[$PerturbationSymbol]] := Module[
 (* ::Subsection:: *)
 (*FTeV function definition*)
 
-Options[FTeV] = {Metric->$Metric, Coordinates->$Coordinates};
-FTeV[string_?StringQ, OptionsPattern[]]:= Block[
+Options[tensorEvaluate] = {Metric->$Metric, Coordinates->$Coordinates};
+tensorEvaluate[string_?StringQ, OptionsPattern[]]:= Block[
   {
-    coordvec = OptionValue[Coordinates],
-    metric = OptionValue[Metric],
-    d = Length[coordvec]-1,  (* number of space-time dimensions *) 
-    Chr, 
-    gI, 
-    g,
-    R,
-    RS,
-    G,
-    x,
-    i, j, k, l, m, n,
-    Weyl,
-    ruddd,
+    coordvec, (* coordinate vector *)
+    metric,
+    d,  (* number of space only dimensions, no time *) 
+    Chr, (*Christofell Symbols*)
+    gI,  (* inverse metric components*)
+    g,  (*metric components*)
+    R,   (*Ricci or Riemann tensors, depending on the number of components*)
+    RS, (*Ricci Scalar*)
+    G, (*Einstein tensor*)
+    x, (*coordinate component*)
+    i, j, k, l, m, n, (*several indices*)
+    Weyl, (*Weyl tensor*)
+    ruddd, (*auxiliary variable*)
     ruuuu,
     rdddd,
-    Kretsch
+    Kret (*Kretschmann scalar*)
   },
+  coordvec = OptionValue[Coordinates];
+  dim = Length[coordvec]-1;
+  metric = OptionValue[Metric];
 
   (* Defining coordinate componentes*)
   x[i_]:= coordvec[[i+1]];
@@ -203,7 +186,7 @@ FTeV[string_?StringQ, OptionsPattern[]]:= Block[
   (* Weyl Tensor *)
   Weyl[l_,i_,k_,j_] := Weyl[l,i,k,j] = Sum[g[l,m]R[m,i,k,j],{m,0,d}]-1/(d-1) (R[l,k] g[i,j]+R[i,j] g[l,k]-R[l,j]g[i,k]-R[i,k]g[l,j])+1/(d (d-1)) RS(g[l,k] g[i,j] -g[i,k] g[l,j]);
   
-  Kretsch:=(
+  Kret:=(
     ruddd=Table[R[l,i,k,j],{l,0,d},{i,0,d},{j,0,d},{k,0,d}];
     ruuuu=indices[ruddd,"uddd","uuuu"];
     rdddd=indices[ruddd,"uddd","dddd"];
@@ -217,10 +200,15 @@ FTeV[string_?StringQ, OptionsPattern[]]:= Block[
     "ricci",Table[R[i,j],{i,0,d},{j,0,d}],
     "riccis", RS,
     "weyl", Table[Weyl[l,i,k,j],{l,0,d},{i,0,d},{j,0,d},{k,0,d}],
-    "kret", Kretsch,
+    "kret", Kret,
     _ , $Failed
   ]
 ];
+
+SetAttributes[tev, Attributes[tensorEvaluate]];
+tev = tensorEvaluate;
+Options[tev] = Options[tensorEvaluate];
+
 
 (* ::Subsection:: *)
 (*Covariant derivative (DCov)  & The Box (D'Alembertian) of a tensor (TensorBox)*)
@@ -231,45 +219,51 @@ FTeV[string_?StringQ, OptionsPattern[]]:= Block[
 DCov::wrongRank ="The tensor rank should be one less than the number of indices used in dcov.";
 
 (*For a scalar*)
-DCov[scalar_][A_?NumberQ]:= D[scalar, X[A]] ;
+DCov[scalar_][a_?NumberQ]:= D[scalar, X[a]] ;
 
 (*For a vector*)
 DCov[Vector_?ListQ][A_?NumberQ,B_?NumberQ] /; 
   If[Length@Dimensions@Vector == 1,True, Message[DCov::wrongRank]; False] := Module[
   {
-    gammatensor = FTeV["Chr"],
+    gammatensor,
     gamma,
     vec
   },
+  gammatensor = tensorEvaluate["Chr"];
   vec[a_] := Vector[[a+1]];
   gamma[a_,b_,c_] := gammatensor[[a+1,b+1,c+1]];
   D[vec[B], X[A]] - Contract[gamma[a,A,B] vec[a], a]
 ];
 
-(*For a rank 2 tensor*)
-DCov[Tensor_?ListQ][A_?NumberQ,B_?NumberQ,C_?NumberQ] /;
-  If[Length@Dimensions@Tensor == 2,True, Message[DCov::wrongRank]; False] := Module[
+(*For a rank 2 tensor. THIS CASE SHOULD BE IMPROVED (NOTATION) AND USED AS A TEMPLATE FOR THE OTHER CASES*)
+DCov[Tensor_?ListQ][a_?NumberQ,b_?NumberQ,c_?NumberQ] /;
+  If[Length@Dimensions@Tensor == 2,True, Message[DCov::wrongRank]; False] := Block[
   {
-    gammatensor = FTeV["Chr"],
+    gammatensor,
     gamma,
-    tensor
+    tensor,
+    i,j,k,
+    x
   },
-  tensor[a_,b_]:= Tensor[[a+1,b+1]];
-  gamma[a_,b_,c_]:= gammatensor[[a+1,b+1,c+1]];
-  D[tensor[B,C],x[A]]- Contract[gamma[a,A,B]tensor[a, C],a] - Contract[ gamma[a,A,C]tensor[B,a], a]
+  x[i_]:= $Coordinates[[i+1]];
+  gammatensor = tensorEvaluate["Chr"];
+  tensor[i_,j_]:= Tensor[[i+1,j+1]];
+  gamma[i_,j_,k_]:= gammatensor[[i+1,j+1,k+1]];
+  D[tensor[b,c],x[a]]- Contract[gamma[i,a,b]tensor[i, c],i] - Contract[gamma[i,a,c]tensor[b,i], i]
 ];
 
 (*For a rank 3 tensor*)
 DCov[Tensor_?ListQ][A_?NumberQ,B_?NumberQ,C_?NumberQ, DD_?NumberQ] /; 
   If[Length@Dimensions@Tensor == 3,True, Message[DCov::wrongRank]; False] := Module[
   {
-    gammatensor = FTeV["Chr"],
+    gammatensor,
     gamma,
     tensor
   },
+  gammatensor = tensorEvaluate["Chr"];
   tensor[a_,b_,c_]:= Tensor[[a+1,b+1, c+1]];
   gamma[a_,b_,c_]:= gammatensor[[a+1,b+1,c+1]];
-  D[tensor[A, C, DD], x[A]]- Contract[gamma[a,A,B]tensor[a, C, DD],a] - Contract[gamma[a,A,C]tensor[B,a, DD],a]- Contract[gamma[a,A,DD]tensor[B,C, a] ,a]
+  D[tensor[A, C, DD], X[A]]- Contract[gamma[a,A,B]tensor[a, C, DD],a] - Contract[gamma[a,A,C]tensor[B,a, DD],a]- Contract[gamma[a,A,DD]tensor[B,C, a] ,a]
 ];
 
 (*This definition generates a tensor automatically, no indices are specified *)
@@ -305,18 +299,19 @@ TensorBox[tensor_]:= Block[
 Options[indices]={Metric->$Metric};
 indices[tensor_?ListQ,string1_?StringQ,string2_?StringQ,OptionsPattern[]] := Block[
   {
-    metric = OptionValue[Metric];,
+    metric,
     x,
     var,
     check, (* check defines which indices will be raised or lowered *)
     g,
     gI,
-    Imetric = Inverse[metric],
+    Imetric,
     prodsum,
     varsum,
     tabsum
   },
-  
+  metric = OptionValue[Metric];
+  Imetric = Inverse[metric];
   g[i_,j_]:= Indexed[metric,{i,j}];
   gI[i_,j_]:= Indexed[Imetric,{i,j}];
 
