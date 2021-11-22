@@ -19,3 +19,4 @@ After the instalation, to call the package just execute the following in Mathema
 ## Other
 
 Further usage details will appear here.
+
