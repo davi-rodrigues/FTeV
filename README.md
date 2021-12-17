@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/422944259.svg)](https://zenodo.org/badge/latestdoi/422944259)
+
+
 # FTeV
 Fast Tensor eValuation
 
