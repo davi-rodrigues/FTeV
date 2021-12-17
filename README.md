@@ -16,9 +16,7 @@ After the instalation, to call the package just execute the following in Mathema
 << FTeV`
 ```
 
-## Usage example
-
-A usage example notebook is provided.
+A usage example notebook is provided (`Simple example for perturbations within GR and BD.nb`).
 
 
 ## Other
