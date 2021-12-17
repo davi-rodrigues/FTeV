@@ -4,7 +4,6 @@
 (* ::Title:: *)
 (*FTeV*)
 
-
 (* ::Subtitle:: *)
 (*Fast Tensors eValuation*)
 
@@ -22,7 +21,7 @@ BeginPackage["FTeV`"];
 
 Clear["FTeV`*"]; (*Useful if FTeV is called more than once*)
 
-Print[Style["Fast Tensors eValuation", Bold], " v.0.13.1", " ", Style["("<>DateString[FileDate[$InputFileName], {"Year", ".", "Month", ".", "Day", " ", "Time"}]<>")", 09]];
+Print[Style["Fast Tensors eValuation", Bold], " v.0.13.2", " ", Style["("<>DateString[FileDate[$InputFileName], {"Year", ".", "Month", ".", "Day", " ", "Time"}]<>")", 09]];
 Print["Help: Start by defining $Coordinates (coordinates names vector) and $Metric (the metric matrix)."];
 Print["Use tensorEvaluate[\"X\"] or tev[\"X\"] to compute X, where X can be: \n * \"Chr\" for Christoffel symbol, \n * \"Riemann\" for Riemann tensor, \n * \"Ricci\" for Ricci tensor, \n * \"RicciS\" for Ricci scalar, \n * \"G\" for Einstein tensor, \n * \"Weyl\" for Weyl tensor, \n * \"Kret\" for Kretschmann scalar."];
 
