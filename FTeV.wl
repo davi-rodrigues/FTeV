@@ -381,6 +381,15 @@ TensorPrint[tensor_] := Block[
   ]
 ];
 
+(* ::Subsection:: *)
+(*templates*)
+spherical:= {t, r, \[Theta], \[Phi]};
+shc:=({
+  {-(1 - (2 M)/r), 0, 0, 0},
+  {0, 1 + (2 M)/r, 0, 0},
+  {0, 0, r^2, 0},
+  {0, 0, 0, r^2 Sin[\[Theta]]^2}
+ }) ;
 
 (* ::Section:: *)
 (*End*)
