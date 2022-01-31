@@ -1,8 +1,17 @@
 [![DOI](https://zenodo.org/badge/422944259.svg)](https://zenodo.org/badge/latestdoi/422944259)
 
 
-# FTeV
-Fast Tensor eValuation
+# Fast Tensor eValuation (FTeV)
+
+FTeV is a simple an useful Mathematica Package for defining and computing tensors from a given coordiante basis. Emphasis is given to the tensors used in General Relativity and other theories of gravity. Convenient functions for printig out the results and for computing metric perturbations are included.
+
+## Example 1: cosmological background
+
+![example1](images/FrwExample.png)
+
+## Example 2: FRW with perturbations
+
+![example2](images/FrwPertExample.png)
 
 ## Instalation
 To install, copy and execute the following line inside Mathematica:
@@ -21,8 +30,6 @@ After the instalation, to call the package just execute the following in Mathema
 
 A usage example notebook is provided (`Simple example for perturbations within GR and BD.nb`).
 
+## Thanks
 
-## Other
-
-Further usage details will appear here.
-
+FTeV belongs to a scientific project that is partially funded by CNPq (Brazil) and FAPES (Brazil).
