@@ -5,11 +5,11 @@
 
 FTeV is a simple an useful Mathematica Package for defining and computing tensors from a given coordiante basis. Emphasis is given to the tensors used in General Relativity and other theories of gravity. Convenient functions for printig out the results and for computing metric perturbations are included.
 
-## Example 1: cosmological background
+## Example 1: Cosmological background
 
 ![example1](images/FrwExample.png)
 
-## Example 2: FRW with perturbations
+## Example 2: Perturbations
 
 ![example2](images/FrwPertExample2.png)
 
