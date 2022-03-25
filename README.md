@@ -14,7 +14,7 @@ FTeV is a simple an useful Mathematica Package for defining and computing tensor
 ![example2](images/FrwPertExample2.png)
 
 ## Instalation
-To install, copy and execute the following line inside Mathematica:
+To install, copy and execute the following line inside Mathematica: 
 ```
 PacletInstall["https://github.com/davi-rodrigues/FTeV/raw/main/FTeV-0.13.2.paclet"]
 ```
