@@ -1,11 +1,16 @@
+(* ::Package:: *)
 
 (* ::Package:: *)
+(**)
+
 
 (* ::Title:: *)
 (*FTeV*)
 
+
 (* ::Subtitle:: *)
 (*Fast Tensors eValuation*)
+
 
 (* ::Author:: *)
 (*Davi C. Rodrigues*)
@@ -16,6 +21,7 @@
 
 (* ::Section:: *)
 (*Begin package*)
+
 
 BeginPackage["FTeV`"];
 
@@ -29,6 +35,7 @@ Print["Templates: \n * \"SphC\" for spherical coordinates \n * \"Shc\" for Schwa
 
 (* ::Subsection:: *)
 (*Usage messages*)
+
 
 tensorEvaluate::usage="tensorCompute[string] reads off the global $Coordinates and $Metric and takes in a string, which must be one of the following:
 chr: For Christoffel symbols of the second kind (\!\(\*SubscriptBox[SuperscriptBox[\(gamma\), \(a\)], \(bc\)]\));
@@ -136,6 +143,7 @@ InsertTimeWeight[expression_, weight_:Sqrt[$PerturbationSymbol]] := Module[
 (* ::Subsection:: *)
 (*FTeV function definition*)
 
+
 Options[tensorEvaluate] = {Metric->$Metric, Coordinates->$Coordinates};
 tensorEvaluate[string_?StringQ, OptionsPattern[]]:= Block[
   {
@@ -195,7 +203,7 @@ tensorEvaluate[string_?StringQ, OptionsPattern[]]:= Block[
   Switch[ToLowerCase@string,
     "g", Table[G[i,j], {i,0,dim},{j,0,dim}],
     "chr",Table[Chr[k,i,j],{k,0,dim},{i,0,dim},{j,0,dim}],
-    "riemann",Table[R[l,i,k,j],{l,0,dim},{i,0,dim},{j,0,dim},{k,0,dim}],
+    "riemann",Table[R[l,i,j,k],{l,0,dim},{i,0,dim},{j,0,dim},{k,0,dim}],
     "ricci",Table[R[i,j],{i,0,dim},{j,0,dim}],
     "riccis", RS,
     "weyl", Table[Weyl[l,i,k,j],{l,0,dim},{i,0,dim},{j,0,dim},{k,0,dim}],
@@ -295,6 +303,7 @@ TensorBox[tensor_]:= Block[
 (* ::Subsection:: *)
 (*indices function: raises and lower indices.*)
 
+
 Options[indices]={Metric->$Metric};
 indices[tensor_?ListQ,string1_?StringQ,string2_?StringQ,OptionsPattern[]] := Block[
   {
@@ -355,6 +364,7 @@ indices[tensor_?ListQ,string1_?StringQ,string2_?StringQ,OptionsPattern[]] := Blo
 (* ::Subsection:: *)
 (*tensor print: a convenient display*)
 
+
 $TensorPrintReplacements := {xx_[spacetime] ->  xx, xx_[space] -> xx };
 
 $TensorPrintReplacementsAlternative := {xx_[spacetime] ->  xx[Style["\[Tau],x", Italic]], xx_[space] -> xx[Style["x",Italic]], xx_[numbers_?NumberQ] -> Subscript[xx, numbers] };
@@ -381,8 +391,12 @@ TensorPrint[tensor_] := Block[
   ]
 ];
 
+
+
 (* ::Subsection:: *)
 (*templates*)
+
+
 sphC:= {t, r, \[Theta], \[Phi]};
 shc:=({
   {-(1 - (2 M)/r), 0, 0, 0},
@@ -390,6 +404,8 @@ shc:=({
   {0, 0, r^2, 0},
   {0, 0, 0, r^2 Sin[\[Theta]]^2}
  }) ;
+
+
 
 (* ::Section:: *)
 (*End*)

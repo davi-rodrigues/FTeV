@@ -3,7 +3,7 @@
 
 # Fast Tensor eValuation (FTeV)
 
-FTeV is a simple an useful Mathematica Package for defining and computing tensors from a given coordinate basis. Emphasis is given to the tensors used in General Relativity and other theories of gravity. Convenient functions for printig out the results and for computing metric perturbations are included.
+FTeV is a simple a useful Mathematica Package for defining and computing tensors from a given coordinate basis. Emphasis is given to the tensors used in General Relativity and other theories of gravity. Convenient functions for printing out the results and for computing metric perturbations are included.
 
 ## Example 1: Cosmological background
 
