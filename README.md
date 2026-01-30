@@ -19,7 +19,9 @@ To install, copy and execute the following line inside Mathematica:
 PacletInstall["https://github.com/davi-rodrigues/FTeV/raw/main/FTeV-0.13.4.paclet"]
 ```
 
-Other FTeV versions can be easily installed changing properly the last number.
+If `PacletInstall` does not work (which may happen in older Mathematica versions), directly download the file `FTeV-0.13.4.paclet` and save it in any folder. Then open Mathematica and run `PacletInstall["put_here_the full_path_to_the_file/FTeV-0.13.4.paclet"]`.
+
+Older FTeV versions can be easily installed changing properly the last number.
 
 An output with a `PacletObject` should appear immediately. 
 
